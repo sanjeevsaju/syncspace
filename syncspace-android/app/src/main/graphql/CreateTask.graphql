@@ -1,0 +1,14 @@
+mutation CreateTask($title: String!, $description: String!, $assigneeIds: [String!]!) {
+    createTask(title: $title, description: $description, assigneeIds: $assigneeIds) {
+        id
+        title
+        description
+        status
+        assignees {
+            userId
+            username
+            displayName
+            avatarUrl
+        }
+    }
+}

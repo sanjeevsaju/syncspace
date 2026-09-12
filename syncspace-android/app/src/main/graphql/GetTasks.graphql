@@ -1,0 +1,14 @@
+query GetTasks {
+    tasks {
+        id
+        title
+        description
+        status
+        assignees {
+            userId
+            username
+            displayName
+            avatarUrl
+        }
+    }
+}

@@ -1,0 +1,171 @@
+services:
+  # -------------------------------------------------------------
+  # 1. PostgreSQL (For Auth Service & Profile Service)
+  # -------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: syncspace_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: syncspace_admin
+      POSTGRES_PASSWORD: root_super_secret_password
+      POSTGRES_DB: syncspace_db
+    ports:
+      - "5432:5432" # Exposed locally for development/debugging
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # Automatically run scripts on start to create our logical DBs
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - syncspace-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U syncspace_admin -d syncspace_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------------------------------------
+  # 2. MongoDB (For Task Service - Flexible Board/Task schemas)
+  # -------------------------------------------------------------
+  mongodb:
+    image: mongo:4.4.18 # Native ARM64 support
+    container_name: syncspace_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: syncspace_admin
+      MONGO_INITDB_ROOT_PASSWORD: root_super_secret_password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - syncspace-network
+
+  # -------------------------------------------------------------
+  # 3. RabbitMQ (Message Broker for Async Event Communication)
+  # -------------------------------------------------------------
+  rabbitmq:
+    # We use "-management" tag to get the web dashboard
+    image: rabbitmq:3.13-management-alpine
+    container_name: syncspace_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: syncspace_admin
+      RABBITMQ_DEFAULT_PASS: root_super_secret_password
+    ports:
+      - "5672:5672"   # AMQP protocol port (microservices connect here)
+      - "15672:15672" # Web Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - syncspace-network
+
+  # ----------------------------------------------------
+  # 4. API Gateway (Nginx)
+  # ----------------------------------------------------
+  gateway:
+    image: nginx:1.25-alpine
+    container_name: syncspace_gateway
+    restart: always
+    ports:
+      - "80:80"  # Primary HTTP entry point for external Android clients
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - syncspace-network
+  
+  # -------------------------------------------------------------
+  # 4. Auth Service (Kotlin / Ktor - REST)
+  # -------------------------------------------------------------
+  auth:
+    image: syncspace-server-auth:latest
+    build:
+      context: ./syncspace-auth-service
+      dockerfile: Dockerfile
+    container_name: syncspace_auth
+    restart: always
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/auth_db
+      DB_USER: syncspace_admin
+      DB_PASSWORD: root_super_secret_password
+      JWT_SECRET: super_secret_jwt_key_syncspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - syncspace-network
+  
+  # -------------------------------------------------------------
+  # 5. Profile Service (Kotlin / gRPC - Internal RPC)
+  # -------------------------------------------------------------
+  profile:
+    image: syncspace-server-profile:latest
+    build:
+      context: ./syncspace-profile-service
+      dockerfile: Dockerfile
+    container_name: syncspace_profile
+    restart: always
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/profile_db
+      DB_USER: syncspace_admin
+      DB_PASSWORD: root_super_secret_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - syncspace-network
+  
+  # -------------------------------------------------------------
+  # 6. Task Service (Kotlin / GraphQL / MongoDB + gRPC Client)
+  # -------------------------------------------------------------
+  task:
+    image: syncspace-server-task:latest
+    build:
+      context: ./syncspace-task-service
+      dockerfile: Dockerfile
+    container_name: syncspace_task
+    restart: always
+    environment:
+      MONGO_URI: mongodb://syncspace_admin:root_super_secret_password@mongodb:27017
+      PROFILE_SERVICE_HOST: profile
+      PROFILE_SERVICE_PORT: 50051
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: syncspace_admin
+      RABBITMQ_PASS: root_super_secret_password
+    depends_on:
+      - mongodb
+      - profile
+      - rabbitmq
+    networks:
+      - syncspace-network
+
+  # -------------------------------------------------------------
+  # 7. Notification Service (WebSockets + RabbitMQ Consumer)
+  # -------------------------------------------------------------
+  notification:
+    image: syncspace-server-notification:latest
+    build:
+      context: ./syncspace-notification-service
+      dockerfile: Dockerfile
+    container_name: syncspace_notification
+    restart: always
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: syncspace_admin
+      RABBITMQ_PASS: root_super_secret_password
+    depends_on:
+      - rabbitmq
+    networks:
+      - syncspace-network
+
+# -------------------------------------------------------------
+# Isolated Docker Network & Persistent Volumes
+# -------------------------------------------------------------
+networks:
+  syncspace-network:
+    driver: bridge
+
+volumes:
+  pg_data:
+  mongo_data:
+  rabbitmq_data:

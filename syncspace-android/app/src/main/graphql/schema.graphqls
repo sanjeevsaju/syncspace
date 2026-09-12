@@ -1,0 +1,24 @@
+type Task {
+    id: ID!
+    title: String!
+    description: String!
+    status: String!
+    assignees: [UserProfile!]!
+}
+
+type UserProfile {
+    userId: ID!
+    username: String!
+    displayName: String!
+    avatarUrl: String!
+}
+
+type Query {
+    tasks: [Task!]!
+    taskById(id: ID!): Task
+}
+
+type Mutation {
+    createTask(title: String!, description: String!, assigneeIds: [String!]!): Task!
+    deleteTask(id: String!): Boolean!
+}

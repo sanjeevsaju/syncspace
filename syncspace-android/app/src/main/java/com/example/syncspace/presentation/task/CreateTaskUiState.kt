@@ -1,0 +1,9 @@
+package com.example.syncspace.presentation.task
+
+data class CreateTaskUiState(
+    val title: String = "",
+    val description: String = "",
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isSuccess: Boolean = false
+)

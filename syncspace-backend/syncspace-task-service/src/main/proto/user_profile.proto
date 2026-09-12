@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package com.syncspace.profile.grpc;
+
+option java_multiple_files = true;
+option java_package = "com.syncspace.profile.grpc";
+
+// The RPC Service Definition
+service UserProfileService {
+  // Fetch a single profile by User ID
+  rpc GetProfile (GetProfileRequest) returns (UserProfileResponse);
+
+  // Batch fetch profiles (Used by Task Service to resolve multiple assignees at once)
+  rpc GetProfileBatch (GetProfilesBatchRequest) returns (GetProfilesBatchResponse);
+
+  // Create or update a profile
+  rpc UpsertProfile (UpsertProfileRequest) returns (UserProfileResponse);
+}
+
+message UserProfileResponse {
+  string user_id = 1;
+  string username = 2;
+  string display_name = 3;
+  string avatar_url = 4;
+  string bio = 5;
+}
+
+message GetProfileRequest {
+  string user_id = 1;
+}
+
+message GetProfilesBatchRequest {
+  repeated string user_ids = 1;
+}
+
+message GetProfilesBatchResponse {
+  repeated UserProfileResponse profiles = 1;
+}
+
+message UpsertProfileRequest {
+  string user_id = 1;
+  string username = 2;
+  string display_name = 3;
+  string avatar_url = 4;
+  string bio = 5;
+}
