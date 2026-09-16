@@ -25,6 +25,7 @@ jobs:
       matrix:
         service:
           - syncspace-auth-service
+          - syncspace-notification-service
     defaults:
       run:
         working-directory: syncspace-backend/${{matrix.service}}
@@ -57,6 +58,7 @@ jobs:
       matrix:
         service:
           - syncspace-auth-service
+          - syncspace-notification-service
     defaults:
       run:
         working-directory: syncspace-backend/${{matrix.service}}
