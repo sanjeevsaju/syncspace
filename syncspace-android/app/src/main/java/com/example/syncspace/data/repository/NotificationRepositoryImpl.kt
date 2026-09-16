@@ -24,6 +24,7 @@ import okhttp3.WebSocketListener
 @Singleton
 class NotificationRepositoryImpl @Inject constructor(private val okHttpClient: OkHttpClient) : NotificationRepository {
 
+    @Suppress("ktlint:standard:backing-property-naming")
     private val _messages = MutableSharedFlow<Notification>(extraBufferCapacity = 64)
     override fun getNotifications(): Flow<Notification> = _messages.asSharedFlow()
 
