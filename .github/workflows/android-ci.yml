@@ -67,6 +67,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
+    needs: lint
     runs-on: ubuntu-latest
     defaults:
       run:
