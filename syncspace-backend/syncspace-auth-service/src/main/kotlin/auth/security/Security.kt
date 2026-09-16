@@ -2,8 +2,8 @@ package org.example.auth.security
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import org.mindrot.jbcrypt.BCrypt
 import java.util.Date
+import org.mindrot.jbcrypt.BCrypt
 
 object Security {
     private val secret = System.getenv("JWT_SECRET") ?: "super_secret_jwt_key_syncspace"
@@ -17,7 +17,7 @@ object Security {
         BCrypt.checkpw(password, hash)
 
     fun generateToken(userId: String, username: String): String {
-        val expirationTime = System.currentTimeMillis() + (86400000 * 7)   // 7 days
+        val expirationTime = System.currentTimeMillis() + (86400000 * 7) // 7 days
         return JWT.create()
             .withSubject(userId)
             .withIssuer(issuer)

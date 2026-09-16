@@ -6,13 +6,13 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import java.util.UUID
 import kotlinx.serialization.Serializable
 import org.example.auth.db.DatabaseFactory.dbQuery
 import org.example.auth.db.UsersTable
 import org.example.auth.security.Security
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import java.util.UUID
 
 @Serializable
 data class RegisterRequest(val email: String, val username: String, val password: String)
@@ -39,12 +39,12 @@ fun Route.authRoutes() {
                         it[passwordHash] = hash
                     }
                     true
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     false
                 }
             }
 
-            if(!success) {
+            if (!success) {
                 call.respond(HttpStatusCode.Conflict, mapOf("error" to "Email or username already exists"))
                 return@post
             }
@@ -61,7 +61,7 @@ fun Route.authRoutes() {
                 UsersTable.select { UsersTable.email eq req.email.lowercase() }.singleOrNull()
             }
 
-            if(userRow == null || !Security.verifyPassword(req.password, userRow[UsersTable.passwordHash])) {
+            if (userRow == null || !Security.verifyPassword(req.password, userRow[UsersTable.passwordHash])) {
                 call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid credentials"))
                 return@post
             }

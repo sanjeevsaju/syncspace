@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object UsersTable: Table("users") {
+object UsersTable : Table("users") {
     val id = varchar("id", 36)
     val email = varchar("email", 36).uniqueIndex()
     val username = varchar("username", 64).uniqueIndex()

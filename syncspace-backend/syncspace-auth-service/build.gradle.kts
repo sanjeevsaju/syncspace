@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm") version "2.3.10"
     id("io.ktor.plugin") version "3.5.1"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.3.10"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     application
 }
 
@@ -40,6 +41,9 @@ dependencies {
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.6")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin {
