@@ -42,6 +42,6 @@ object RabbitMQConsumer {
             }
         }
 
-        channel.basicConsume(queueName, true, deliverCallback, CancelCallback{})
+        channel.basicConsume(queueName, true, deliverCallback, CancelCallback {})
     }
 }

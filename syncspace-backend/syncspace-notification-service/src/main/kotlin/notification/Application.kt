@@ -11,11 +11,11 @@ import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.consumeEach
 import notification.messaging.RabbitMQConsumer
 import notification.ws.ConnectionManager
-import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 fun main() {
     // Start RabbitMQ background listener
@@ -41,7 +41,7 @@ fun Application.module() {
             try {
                 // Keep the socket open and listen for incoming client frames/pings
                 incoming.consumeEach { frame ->
-                    if(frame is Frame.Text) {
+                    if (frame is Frame.Text) {
                         val text = frame.readText()
                         println("Received message from client [$sessionId]: $text")
                     }
