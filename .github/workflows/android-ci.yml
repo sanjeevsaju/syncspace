@@ -64,7 +64,6 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
