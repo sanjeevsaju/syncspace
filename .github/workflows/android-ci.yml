@@ -20,6 +20,9 @@ jobs:
   lint:
     name: Lint / Format Check
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: syncspace-android
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -65,6 +68,9 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: syncspace-android
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
