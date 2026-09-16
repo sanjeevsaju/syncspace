@@ -30,12 +30,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun CreateTaskScreen(
     onTaskCreated: () -> Unit,
     onNavigateBack: () -> Unit,
-    viewModel: CreateTaskViewModel = hiltViewModel()
+    viewModel: CreateTaskViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isSuccess) {
-        if(state.isSuccess) {
+        if (state.isSuccess) {
             viewModel.resetState()
             onTaskCreated()
         }
@@ -49,51 +49,51 @@ fun CreateTaskScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             OutlinedTextField(
                 value = state.title,
                 onValueChange = { viewModel.onEvent(CreateTaskEvent.TitleChanged(it)) },
                 label = { Text("Title") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = state.description,
                 onValueChange = { viewModel.onEvent(CreateTaskEvent.DescriptionChanged(it)) },
                 label = { Text("Description") },
                 minLines = 3,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
             Button(
                 onClick = { viewModel.onEvent(CreateTaskEvent.Submit) },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading
+                enabled = !state.isLoading,
             ) {
-                if(state.isLoading) {
+                if (state.isLoading) {
                     CircularProgressIndicator()
                 } else {
                     Text("Create")
                 }
             }
 
-            if(state.error != null) {
+            if (state.error != null) {
                 Text(
                     text = state.error!!,
                     color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }

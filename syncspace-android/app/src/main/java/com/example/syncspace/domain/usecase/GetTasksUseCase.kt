@@ -5,8 +5,6 @@ import com.example.syncspace.domain.repository.TaskRepository
 import com.example.syncspace.domain.util.DomainResult
 import javax.inject.Inject
 
-class GetTasksUseCase @Inject constructor(
-    private val repository: TaskRepository
-) {
+class GetTasksUseCase @Inject constructor(private val repository: TaskRepository) {
     suspend operator fun invoke(): DomainResult<List<Task>> = repository.getTasks()
 }

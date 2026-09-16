@@ -7,18 +7,16 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
 import javax.inject.Singleton
+import okhttp3.OkHttpClient
 
 @Module
 @InstallIn(SingletonComponent::class)
 object GraphQLModule {
     @Provides
     @Singleton
-    fun provideApolloClient(okHttpClient: OkHttpClient): ApolloClient {
-        return ApolloClient.Builder()
-            .serverUrl("http://${BuildConfig.Base_URL}:80/api/v1/graphql/")
-            .okHttpClient(okHttpClient)
-            .build()
-    }
+    fun provideApolloClient(okHttpClient: OkHttpClient): ApolloClient = ApolloClient.Builder()
+        .serverUrl("http://${BuildConfig.Base_URL}:80/api/v1/graphql/")
+        .okHttpClient(okHttpClient)
+        .build()
 }

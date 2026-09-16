@@ -31,7 +31,7 @@ fun RootNavGraph() {
     startDestination?.let { destination ->
         NavHost(
             navController = navController,
-            startDestination = destination
+            startDestination = destination,
         ) {
             authNavGraph(
                 navController = navController,
@@ -39,7 +39,7 @@ fun RootNavGraph() {
                     navController.navigate("home") {
                         popUpTo("auth") { inclusive = true }
                     }
-                }
+                },
             )
 
             composable("home") {
@@ -50,14 +50,14 @@ fun RootNavGraph() {
                         navController.navigate("auth") {
                             popUpTo("home") { inclusive = true }
                         }
-                    }
+                    },
                 )
             }
 
             composable("create_task") {
                 CreateTaskScreen(
                     onTaskCreated = { navController.popBackStack() },
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
                 )
             }
 

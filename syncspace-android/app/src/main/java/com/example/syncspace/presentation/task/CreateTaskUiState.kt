@@ -5,5 +5,5 @@ data class CreateTaskUiState(
     val description: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
 )

@@ -7,12 +7,10 @@ import com.example.syncspace.domain.repository.TaskRepository
 import com.example.syncspace.domain.util.DomainResult
 import javax.inject.Inject
 
-class TaskRepositoryImpl @Inject constructor(
-    private val remoteDataSource: TaskRemoteDataSource
-): TaskRepository {
+class TaskRepositoryImpl @Inject constructor(private val remoteDataSource: TaskRemoteDataSource) : TaskRepository {
     override suspend fun getTasks(): DomainResult<List<Task>> = try {
         val response = remoteDataSource.getTasks().execute()
-        if(response.hasErrors()) {
+        if (response.hasErrors()) {
             val errors = response.errors?.joinToString { it.message } ?: "Unknown Error"
             DomainResult.Error(errors)
         } else {
@@ -27,9 +25,9 @@ class TaskRepositoryImpl @Inject constructor(
                             userId = assignee.userId,
                             username = assignee.username,
                             displayName = assignee.displayName,
-                            avatarUrl = assignee.avatarUrl
+                            avatarUrl = assignee.avatarUrl,
                         )
-                    }
+                    },
                 )
             } ?: emptyList()
             DomainResult.Success(tasks)
@@ -41,7 +39,7 @@ class TaskRepositoryImpl @Inject constructor(
     override suspend fun createTask(
         title: String,
         description: String,
-        assigneeIds: List<String>
+        assigneeIds: List<String>,
     ): DomainResult<Task> = try {
         val response = remoteDataSource.createTask(title, description, assigneeIds).execute()
 
@@ -50,16 +48,19 @@ class TaskRepositoryImpl @Inject constructor(
         }
 
         // Log everything
-        android.util.Log.d("TaskRepo", """
+        android.util.Log.d(
+            "TaskRepo",
+            """
         Response:
         hasErrors: ${response.hasErrors()}
         data: ${response.data}
         errors: ${response.errors}
         exception: ${response.exception}
         raw body? (can't get easily, but exception might reveal parsing)
-    """.trimIndent())
+            """.trimIndent(),
+        )
 
-        if(response.hasErrors()) {
+        if (response.hasErrors()) {
             val errors = response.errors?.joinToString { it.message } ?: "Unknown Error"
             DomainResult.Error(errors)
         } else {
@@ -74,13 +75,16 @@ class TaskRepositoryImpl @Inject constructor(
                             userId = assignee.userId,
                             username = assignee.username,
                             displayName = assignee.displayName,
-                            avatarUrl = assignee.avatarUrl
+                            avatarUrl = assignee.avatarUrl,
                         )
-                    }
+                    },
                 )
             }
-            if(task != null) DomainResult.Success(task)
-            else DomainResult.Error("Empty Response")
+            if (task != null) {
+                DomainResult.Success(task)
+            } else {
+                DomainResult.Error("Empty Response")
+            }
         }
     } catch (e: Exception) {
         DomainResult.Error("Network Error: ${e.message}")
@@ -91,16 +95,18 @@ class TaskRepositoryImpl @Inject constructor(
             .deleteTask(id)
             .execute()
 
-        if(response.hasErrors()) {
+        if (response.hasErrors()) {
             val errors = response.errors?.joinToString { it.message } ?: "Unknown Error"
             DomainResult.Error(errors)
         } else {
             val deleted = response.data?.deleteTask ?: false
-            if(deleted) DomainResult.Success(Unit)
-            else DomainResult.Error("Task not found or could not be deleted")
+            if (deleted) {
+                DomainResult.Success(Unit)
+            } else {
+                DomainResult.Error("Task not found or could not be deleted")
+            }
         }
     } catch (e: Exception) {
         DomainResult.Error("Network Error: ${e.message}")
     }
-
 }

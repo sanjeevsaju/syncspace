@@ -32,7 +32,7 @@ import com.example.syncspace.domain.model.Notification
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
-    viewModel: NotificationViewModel = hiltViewModel()
+    viewModel: NotificationViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -44,14 +44,14 @@ fun NotificationScreen(
                     IconButton(onClick = { viewModel.onEvent(NotificationEvent.ClearAll) }) {
                         Icon(Icons.Default.ClearAll, contentDescription = "Clear All")
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -61,10 +61,10 @@ fun NotificationScreen(
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
-                    Button(onClick = { viewModel.onEvent(NotificationEvent.DismissError)}) {
+                    Button(onClick = { viewModel.onEvent(NotificationEvent.DismissError) }) {
                         Text("Dismiss")
                     }
                 }
@@ -88,17 +88,17 @@ fun NotificationItem(notification: Notification) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 16.dp)
+            .padding(horizontal = 4.dp, vertical = 16.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = notification.message,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
             Text(
                 text = "at ${notification.timeStamp}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

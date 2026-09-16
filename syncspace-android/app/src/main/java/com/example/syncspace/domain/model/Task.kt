@@ -5,5 +5,5 @@ data class Task(
     val title: String,
     val description: String,
     val status: String,
-    val assignees: List<UserProfile> = emptyList()
+    val assignees: List<UserProfile> = emptyList(),
 )

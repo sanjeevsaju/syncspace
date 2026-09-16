@@ -1,8 +1,3 @@
 package com.example.syncspace.domain.model
 
-data class User(
-    val id: String,
-    val username: String,
-    val email: String,
-    val token: String
-)
+data class User(val id: String, val username: String, val email: String, val token: String)

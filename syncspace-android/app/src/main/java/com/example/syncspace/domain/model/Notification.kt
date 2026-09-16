@@ -6,5 +6,5 @@ data class Notification(
     val id: String = System.currentTimeMillis().toString(),
     val message: String,
     val type: String? = null,
-    val timeStamp: Date = Date()
+    val timeStamp: Date = Date(),
 )

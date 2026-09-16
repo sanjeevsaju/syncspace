@@ -41,9 +41,9 @@ fun TaskListsScreen(
     onNavigateToCreateTask: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    viewModel: TaskListViewModel = hiltViewModel()
+    viewModel: TaskListViewModel = hiltViewModel(),
 ) {
-    val state by  viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -59,22 +59,22 @@ fun TaskListsScreen(
                     }) {
                         Icon(Icons.Default.Logout, contentDescription = "Logout")
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToCreateTask) {
                 Text(
                     text = "+",
-                    fontSize = 30.sp
+                    fontSize = 30.sp,
                 )
             }
-        }
-    ){ paddingValues ->
+        },
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
         ) {
             when {
                 state.isLoading -> {
@@ -84,7 +84,7 @@ fun TaskListsScreen(
                 }
 
                 state.error != null -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("Error: ${state.error}")
                             Spacer(Modifier.height(8.dp))
@@ -112,7 +112,7 @@ fun TaskListsScreen(
                         items(state.tasks) { task ->
                             TaskItem(
                                 task = task,
-                                deleteTask = { viewModel.onEvent(TaskListEvent.DeleteTask(task)) }
+                                deleteTask = { viewModel.onEvent(TaskListEvent.DeleteTask(task)) },
                             )
                         }
                     }
@@ -125,32 +125,32 @@ fun TaskListsScreen(
 @Composable
 fun TaskItem(
     task: Task,
-    deleteTask: () -> Unit
+    deleteTask: () -> Unit,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = task.title, style = MaterialTheme.typography.titleMedium)
             Text(text = task.description, style = MaterialTheme.typography.bodyMedium)
             Text(text = "Status: ${task.status}", style = MaterialTheme.typography.bodySmall)
 
-            if(task.assignees.isNotEmpty()) {
+            if (task.assignees.isNotEmpty()) {
                 Text(
                     text = "Assignees: ${task.assignees.joinToString { it.displayName }}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
         }
         IconButton(
             onClick = deleteTask,
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.align(Alignment.End),
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete item"
+                contentDescription = "Delete item",
             )
         }
     }
