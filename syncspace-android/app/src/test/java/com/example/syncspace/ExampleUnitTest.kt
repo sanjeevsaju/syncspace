@@ -1,6 +1,6 @@
 package com.example.syncspace
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
