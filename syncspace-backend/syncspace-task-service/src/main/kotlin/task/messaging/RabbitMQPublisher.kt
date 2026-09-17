@@ -11,18 +11,19 @@ data class TaskEvent(
     val eventType: String,
     val taskId: String,
     val title: String,
-    val timeStamp: Long = System.currentTimeMillis()
+    val timeStamp: Long = System.currentTimeMillis(),
 )
 
 object RabbitMQPublisher {
     private val host = System.getenv("RABBITMQ_HOST") ?: "rabbitmq"
     private val exchangeName = System.getenv("syncspace.events") ?: "syncspace.events"
 
-    private val connectionFactory = ConnectionFactory().apply {
-        this.host = RabbitMQPublisher.host
-        this.username = System.getenv("RABBITMQ_USER") ?: "syncspace_admin"
-        this.password = System.getenv("RABBITMQ_PASS") ?: "root_super_secret_password"
-    }
+    private val connectionFactory =
+        ConnectionFactory().apply {
+            this.host = RabbitMQPublisher.host
+            this.username = System.getenv("RABBITMQ_USER") ?: "syncspace_admin"
+            this.password = System.getenv("RABBITMQ_PASS") ?: "root_super_secret_password"
+        }
 
     private val connection by lazy { connectionFactory.newConnection() }
     private val channel by lazy {
@@ -32,13 +33,17 @@ object RabbitMQPublisher {
         }
     }
 
-    suspend fun publishTaskCreated(taskId: String, title: String) = withContext(Dispatchers.IO) {
+    suspend fun publishTaskCreated(
+        taskId: String,
+        title: String,
+    ) = withContext(Dispatchers.IO) {
         try {
-            val event = TaskEvent(
-                eventType = "TASK_CREATED",
-                taskId = taskId,
-                title = title
-            )
+            val event =
+                TaskEvent(
+                    eventType = "TASK_CREATED",
+                    taskId = taskId,
+                    title = title,
+                )
             val payload = Json.encodeToString(event).toByteArray(Charsets.UTF_8)
             channel.basicPublish(exchangeName, "", null, payload)
         } catch (e: Exception) {

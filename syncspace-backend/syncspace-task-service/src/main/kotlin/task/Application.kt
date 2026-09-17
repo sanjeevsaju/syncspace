@@ -5,8 +5,8 @@ import com.expediagroup.graphql.server.ktor.graphQLPostRoute
 import com.expediagroup.graphql.server.ktor.graphQLSDLRoute
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.server.routing.routing
 import task.graphql.TaskMutation
 import task.graphql.TaskQuery

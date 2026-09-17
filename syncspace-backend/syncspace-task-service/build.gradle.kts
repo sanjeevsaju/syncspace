@@ -11,7 +11,16 @@ plugins {
     id("io.ktor.plugin") version "3.5.1"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.3.10"
     id("com.google.protobuf") version "0.10.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     application
+}
+
+ktlint {
+    filter {
+        exclude { element ->
+            element.file.path.contains("/build/generated/")
+        }
+    }
 }
 
 application {
@@ -33,7 +42,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
 
     // Expedia Group GraphQL Kotlin (Replaces KGraphQL)
-    implementation("com.expediagroup:graphql-kotlin-ktor-server:${graphqlKotlinVersion}")
+    implementation("com.expediagroup:graphql-kotlin-ktor-server:$graphqlKotlinVersion")
 
     // MongoDB Official Kotlin Coroutines Driver
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:5.1.0")

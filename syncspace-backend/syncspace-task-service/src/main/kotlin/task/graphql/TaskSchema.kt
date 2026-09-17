@@ -2,7 +2,6 @@ package task.graphql
 
 import com.expediagroup.graphql.server.operations.Mutation
 import com.expediagroup.graphql.server.operations.Query
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import task.client.ProfileGrpcClient
 import task.db.TaskRepository
@@ -11,7 +10,6 @@ import task.model.TaskResponse
 
 // 1. GraphQL Queries
 class TaskQuery : Query {
-
     suspend fun tasks(): List<TaskResponse> {
         val tasks = TaskRepository.getAllTasks()
         return tasks.map { doc ->
@@ -21,7 +19,7 @@ class TaskQuery : Query {
                 description = doc.description,
                 status = doc.status,
                 // Call gRPC to enrich the Task with real user names
-                assignees = ProfileGrpcClient.fetchProfiles(doc.assigneeIds)
+                assignees = ProfileGrpcClient.fetchProfiles(doc.assigneeIds),
             )
         }
     }
@@ -33,18 +31,17 @@ class TaskQuery : Query {
             title = doc.title,
             description = doc.description,
             status = doc.status,
-            assignees = ProfileGrpcClient.fetchProfiles(doc.assigneeIds)
+            assignees = ProfileGrpcClient.fetchProfiles(doc.assigneeIds),
         )
     }
 }
 
 // 2. GraphQL Mutations
 class TaskMutation : Mutation {
-
     suspend fun createTask(
         title: String,
         description: String,
-        assigneeIds: List<String>
+        assigneeIds: List<String>,
     ): TaskResponse {
         val logger = LoggerFactory.getLogger(TaskMutation::class.java)
 
@@ -59,7 +56,7 @@ class TaskMutation : Mutation {
                 title = created.title,
                 description = created.description,
                 status = created.status,
-                assignees = ProfileGrpcClient.fetchProfiles(created.assigneeIds)
+                assignees = ProfileGrpcClient.fetchProfiles(created.assigneeIds),
 //                assignees = emptyList()
             )
         } catch (e: Exception) {
@@ -79,4 +76,3 @@ class TaskMutation : Mutation {
         }
     }
 }
-
