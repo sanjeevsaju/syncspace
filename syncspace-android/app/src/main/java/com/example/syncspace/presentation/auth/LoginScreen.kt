@@ -71,7 +71,7 @@ fun LoginScreen(
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(13.dp))
             OutlinedTextField(
                 value = state.password,
                 onValueChange = {
