@@ -51,7 +51,6 @@ fun LoginScreen(
             Text(
                 text = "SyncSpace",
                 style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = "Sign in to your workspace",
