@@ -10,7 +10,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTrans
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 // 1. Database Table schema
-object ProfilesTable: Table("profiles") {
+object ProfilesTable : Table("profiles") {
     val userId = varchar("user_id", 36)
     val username = varchar("username", 64)
     val displayName = varchar("display_name", 100).default("")
@@ -21,15 +21,16 @@ object ProfilesTable: Table("profiles") {
 
 object DatabaseFactory {
     fun init() {
-        val config = HikariConfig().apply {
-            jdbcUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://postgres:5432/profile_db"
-            username = System.getenv("DB_USER") ?: "syncspace_admin"
-            password = System.getenv("DB_PASSWORD") ?: "root_super_secret_password"
-            driverClassName = "org.postgresql.Driver"
-            maximumPoolSize = 5
-            isAutoCommit = false
-            transactionIsolation = "TRANSACTION_REPEATABLE_READ"
-        }
+        val config =
+            HikariConfig().apply {
+                jdbcUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://postgres:5432/profile_db"
+                username = System.getenv("DB_USER") ?: "syncspace_admin"
+                password = System.getenv("DB_PASSWORD") ?: "root_super_secret_password"
+                driverClassName = "org.postgresql.Driver"
+                maximumPoolSize = 5
+                isAutoCommit = false
+                transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+            }
 
         val database = Database.connect(HikariDataSource(config))
         transaction(database) {
@@ -37,6 +38,5 @@ object DatabaseFactory {
         }
     }
 
-    suspend fun <T> dbQuery(block: suspend () -> T): T =
-        newSuspendedTransaction(Dispatchers.IO) { block() }
+    suspend fun <T> dbQuery(block: suspend () -> T): T = newSuspendedTransaction(Dispatchers.IO) { block() }
 }

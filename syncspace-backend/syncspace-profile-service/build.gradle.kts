@@ -4,7 +4,16 @@ plugins {
     kotlin("jvm") version "2.3.10"
     id("io.ktor.plugin") version "3.5.1"
     id("com.google.protobuf") version "0.10.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     application
+}
+
+ktlint {
+    filter {
+        exclude { element ->
+            element.file.path.contains("/build/generated/")
+        }
+    }
 }
 
 application {

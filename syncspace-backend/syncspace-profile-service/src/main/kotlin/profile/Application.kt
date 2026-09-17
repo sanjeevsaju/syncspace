@@ -9,9 +9,11 @@ fun main() {
     DatabaseFactory.init()
 
     val port = 50051
-    val server = ServerBuilder.forPort(port)
-        .addService(ProfileServiceImpl())
-        .build()
+    val server =
+        ServerBuilder
+            .forPort(port)
+            .addService(ProfileServiceImpl())
+            .build()
 
     println("gRPC Profile Service started, listening on $port")
     server.start()
