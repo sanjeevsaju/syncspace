@@ -3,7 +3,9 @@ package org.example.auth.routes
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import java.util.UUID
@@ -24,6 +26,12 @@ data class LoginRequest(val email: String, val password: String)
 data class AuthResponse(val userId: String, val username: String, val token: String)
 
 fun Route.authRoutes() {
+    route("/health") {
+        get {
+            call.respondText("OK")
+        }
+    }
+
     route("/register") {
         post {
             val req = call.receive<RegisterRequest>()
