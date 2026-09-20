@@ -1,0 +1,90 @@
+name: Backend CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "syncspace-backend/**"
+      - ".github/workflows/backend-cd.yml"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build and Push ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - syncspace-auth-service
+          - syncspace-notification-service
+          - syncspace-profile-service
+          - syncspace-task-service
+    defaults:
+      run:
+        working-directory: syncspace-backend/${{ matrix.service }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Grant execute permissions for gradlew
+        run: chmod +x gradlew
+
+      - name: Build JAR (skip test, CI already ran them)
+        run: ./gradlew build -x test
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: syncspace-backend/${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy to GCP VM
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /opt/syncspace/syncspace-backend
+            git pull origin main
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+            # Health check via the gateway (nginx) on port 80
+            sleep 15
+            curl -f http://localhost/api/v1/auth/health || (echo "Health Check failed" && exit 1)
