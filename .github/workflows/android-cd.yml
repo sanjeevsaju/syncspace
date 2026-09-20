@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "syncspace-android/**"
+      - ".github/workflows/android-cd.yml"
 
 jobs:
   deploy:
