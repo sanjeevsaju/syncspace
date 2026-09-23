@@ -36,9 +36,6 @@ jobs:
               - 'syncspace-backend/syncspace-profile-service/**'
             syncspace-task-service:
               - 'syncspace-backend/syncspace-task-service/**'
-            deploy_needed:
-              - 'syncspace-backend/**'
-              - '.github/workflows/backend-cd.yml'
 
   build-and-push:
     name: Build and Push ${{ matrix.service }}
@@ -100,7 +97,7 @@ jobs:
   deploy:
     name: Deploy to GCP VM
     needs: [detect-changes, build-and-push]
-    if: always() && needs.detect-changes.outputs.deploy_needed == 'true' && (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
+    if: always() && (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     runs-on: ubuntu-latest
     environment: production
     steps:
