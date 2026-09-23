@@ -17,75 +17,69 @@ on:
       - ".github/workflows/backend-ci.yml"
 
 jobs:
+  detect-changes:
+    name: Detect Changed Services
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            syncspace-auth-service:
+              - 'syncspace-backend/syncspace-auth-service/**'
+            syncspace-notification-service:
+              - 'syncspace-backend/syncspace-notification-service/**'
+            syncspace-profile-service:
+              - 'syncspace-backend/syncspace-profile-service/**'
+            syncspace-task-service:
+              - 'syncspace-backend/syncspace-task-service/**'
+
   lint:
     name: Lint / Format check
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.services != '[]' && needs.detect-changes.outputs.services != '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        service:
-          - syncspace-auth-service
-          - syncspace-notification-service
-          - syncspace-profile-service
-          - syncspace-task-service
+        service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
     defaults:
       run:
-        working-directory: syncspace-backend/${{matrix.service}}
-
+        working-directory: syncspace-backend/${{ matrix.service }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run ktlint check (Kotlin services)
-        run: ./gradlew ktlintCheck
+      - uses: gradle/actions/setup-gradle@v5
+      - run: chmod +x gradlew
+      - run: ./gradlew ktlintCheck
 
   unit-tests:
     name: Unit tests
-    needs: lint
+    needs: [detect-changes, lint]
+    if: ${{ needs.detect-changes.outputs.services != '[]' && needs.detect-changes.outputs.services != '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        service:
-          - syncspace-auth-service
-          - syncspace-notification-service
-          - syncspace-profile-service
-          - syncspace-task-service
+        service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
     defaults:
       run:
-        working-directory: syncspace-backend/${{matrix.service}}
-
+        working-directory: syncspace-backend/${{ matrix.service }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run ktlint check (Kotlin services)
-        run: ./gradlew test
-
+      - uses: gradle/actions/setup-gradle@v5
+      - run: chmod +x gradlew
+      - run: ./gradlew test
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v6

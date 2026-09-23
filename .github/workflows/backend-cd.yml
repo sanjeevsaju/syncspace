@@ -13,8 +13,37 @@ env:
   IMAGE_PREFIX: ${{ github.repository }}
 
 jobs:
+  detect-changes:
+    name: Detect Changed Components
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+      deploy_needed: ${{ steps.filter.outputs.deploy_needed }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Path Filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            syncspace-auth-service:
+              - 'syncspace-backend/syncspace-auth-service/**'
+            syncspace-notification-service:
+              - 'syncspace-backend/syncspace-notification-service/**'
+            syncspace-profile-service:
+              - 'syncspace-backend/syncspace-profile-service/**'
+            syncspace-task-service:
+              - 'syncspace-backend/syncspace-task-service/**'
+            deploy_needed:
+              - 'syncspace-backend/**'
+              - '.github/workflows/backend-cd.yml'
+
   build-and-push:
     name: Build and Push ${{ matrix.service }}
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.services != '[]' && needs.detect-changes.outputs.services != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,11 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service:
-          - syncspace-auth-service
-          - syncspace-notification-service
-          - syncspace-profile-service
-          - syncspace-task-service
+        service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
     defaults:
       run:
         working-directory: syncspace-backend/${{ matrix.service }}
@@ -74,7 +99,8 @@ jobs:
 
   deploy:
     name: Deploy to GCP VM
-    needs: build-and-push
+    needs: [detect-changes, build-and-push]
+    if: always() && needs.detect-changes.outputs.deploy_needed == 'true' && (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -92,6 +118,5 @@ jobs:
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker image prune -f
-            # Health check via the gateway (nginx) on port 80
             sleep 15
             curl -f http://localhost/api/v1/auth/health || (echo "Health Check failed" && exit 1)
